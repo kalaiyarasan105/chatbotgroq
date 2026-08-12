@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An AI-powered chatbot interface built with FastAPI, Groq Llama 3, HTML, CSS, and JavaScript.">
+    <title>Groq AI Chatbot - Interactive Assistant</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="background-decor">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <main class="chat-wrapper">
+        <header class="chat-header" id="chat-header">
+            <div class="bot-info">
+                <div class="avatar-container">
+                    <div class="bot-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span class="status-indicator online"></span>
+                </div>
+                <div class="bot-details">
+                    <h1>Groq AI Chatbot</h1>
+                    <p class="status-text">Active Now</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="clear-chat" title="Clear Chat History">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="chat-messages" id="chat-messages">
+            <!-- Messages will be dynamically appended here -->
+        </section>
+
+        <!-- Loading indicator template (hidden by default) -->
+        <div class="typing-indicator-container" id="typing-indicator" style="display: none;">
+            <div class="typing-bubble">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <footer class="chat-input-area">
+            <form id="chat-form" class="chat-form">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ask me anything..." 
+                    autocomplete="off" 
+                    required
+                >
+                <button type="submit" id="send-button" aria-label="Send message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </footer>
+    </main>
+
+    <!-- Script file -->
+    <script src="/static/script.js"></script>
+</body>
+</html>
