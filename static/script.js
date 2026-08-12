@@ -25,14 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
             welcomeBanner.remove();
         }
 
-        // Add user message to UI
-        appendMessage("user", messageText);
+            appendMessage("user", messageText);
 
-        // Show typing indicator
         showTypingIndicator();
 
         try {
-            // Send request to FastAPI backend
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: {
@@ -47,17 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
-            // Simulate a natural-feeling short typing delay (550ms) for high-fidelity experience
             setTimeout(() => {
                 hideTypingIndicator();
-                appendMessage("bot", data.response);
+                appendMessage("bot", data.response, data.sources);
             }, 550);
 
         } catch (error) {
             console.error("Error communicating with chatbot API:", error);
             setTimeout(() => {
                 hideTypingIndicator();
-                appendMessage("bot", "Oops! I ran into an error connecting to the server. Please check the server logs and try again later.");
+                appendMessage("bot", "Oops! I ran into an error connecting to the server. Please check the server logs and try again later.", null, true);
             }, 500);
         }
     });
@@ -70,24 +66,86 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Function to append a message to the chat container
-    function appendMessage(sender, text) {
+    function appendMessage(sender, text, sources = null, isError = false) {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message", sender);
+        if (isError) {
+            messageDiv.classList.add("message-error");
+        }
 
         const contentDiv = document.createElement("div");
         contentDiv.classList.add("message-content");
         contentDiv.innerText = text;
 
-        const metaDiv = document.createElement("div");
-        metaDiv.classList.add("message-meta");
-        metaDiv.innerText = formatTime(new Date());
+        const metaRow = document.createElement("div");
+        metaRow.classList.add("message-meta", "message-meta-row");
+
+        const timeSpan = document.createElement("span");
+        timeSpan.classList.add("message-meta");
+        timeSpan.innerText = formatTime(new Date());
+        metaRow.appendChild(timeSpan);
+
+        if (sender === "bot" && Array.isArray(sources) && sources.length > 0) {
+            const badge = document.createElement("span");
+            badge.classList.add("message-badge");
+            badge.innerHTML = `<i class="fa-solid fa-link"></i> Evidence available`;
+            metaRow.appendChild(badge);
+        }
 
         messageDiv.appendChild(contentDiv);
-        messageDiv.appendChild(metaDiv);
-        chatMessages.appendChild(messageDiv);
+        messageDiv.appendChild(metaRow);
 
-        // Scroll to the bottom of the container
+        if (sender === "bot" && Array.isArray(sources) && sources.length > 0) {
+            const sourcesPanel = createSourcesPanel(sources);
+            messageDiv.appendChild(sourcesPanel);
+        }
+
+        chatMessages.appendChild(messageDiv);
         scrollToBottom();
+    }
+
+    function createSourcesPanel(sources) {
+        const panel = document.createElement("div");
+        panel.classList.add("sources-panel");
+
+        const toggle = document.createElement("button");
+        toggle.classList.add("sources-toggle");
+        toggle.type = "button";
+        toggle.innerHTML = `<span><i class="fa-solid fa-eye"></i> Show Evidence</span><i class="fa-solid fa-chevron-down"></i>`;
+
+        const list = document.createElement("div");
+        list.classList.add("source-list");
+
+        sources.forEach((source) => {
+            const item = document.createElement("div");
+            item.classList.add("source-item");
+
+            const title = document.createElement("a");
+            title.href = source.url || source.link || "#";
+            title.target = "_blank";
+            title.rel = "noopener noreferrer";
+            title.innerText = source.title || source.url || source.link || "Source";
+
+            const description = document.createElement("p");
+            description.innerText = source.description || source.snippet || source.url || "Referenced document.";
+
+            item.appendChild(title);
+            item.appendChild(description);
+            list.appendChild(item);
+        });
+
+        toggle.addEventListener("click", () => {
+            const expanded = panel.classList.toggle("expanded");
+            if (expanded) {
+                toggle.innerHTML = `<span><i class="fa-solid fa-eye"></i> Hide Evidence</span><i class="fa-solid fa-chevron-up"></i>`;
+            } else {
+                toggle.innerHTML = `<span><i class="fa-solid fa-eye"></i> Show Evidence</span><i class="fa-solid fa-chevron-down"></i>`;
+            }
+        });
+
+        panel.appendChild(toggle);
+        panel.appendChild(list);
+        return panel;
     }
 
     // Helper to format time
@@ -103,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Helper to scroll messages panel to bottom
     function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
     }
 
     // Show typing loader
@@ -124,13 +182,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const welcomeBanner = document.createElement("div");
         welcomeBanner.classList.add("welcome-banner");
         welcomeBanner.innerHTML = `
-            <i class="fa-solid fa-comments"></i>
-            <h2>Welcome to Groq AI Chatbot!</h2>
-            <p>I am an AI assistant powered by Groq Llama 3 and FastAPI. Ask me anything!</p>
+            <div class="welcome-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="welcome-copy">
+                <h2>Welcome to Groq AI Chatbot</h2>
+                <p>Ask your AI assistant anything about Groq, Llama, FastAPI, or your current build.</p>
+            </div>
         `;
         chatMessages.appendChild(welcomeBanner);
         
-        // Add a slight initial delay before the bot says hello
         showTypingIndicator();
         setTimeout(() => {
             hideTypingIndicator();
